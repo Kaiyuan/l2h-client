@@ -24,17 +24,17 @@ func main() {
 		help        bool
 	)
 
-	pflag.StringVarP(&serverAddr, "server", "s", "", "Server address (e.g., https://l2h.host:443)")
-	pflag.StringVarP(&apiKey, "key", "k", "", "API KEY")
-	pflag.StringVarP(&configPath, "config", "c", config.GetConfigPath(), "Config file path")
-	pflag.StringVarP(&pathName, "path", "p", "", "Path name for mapping")
-	pflag.IntVarP(&localPort, "local", "l", 0, "Local port to proxy")
-	pflag.IntVarP(&serviceID, "service", "S", 0, "Service ID")
-	pflag.BoolVar(&listPaths, "list", false, "List all Path mappings")
-	pflag.BoolVar(&listAPI, "list-api", false, "List all API keys")
-	pflag.BoolVar(&listService, "list-service", false, "List all services")
-	pflag.IntVarP(&setDefault, "default", "d", 0, "Set default service")
-	pflag.BoolVarP(&help, "help", "h", false, "Show help")
+	pflag.StringVarP(&serverAddr, "server", "s", "", "服务器地址 (例如 https://l2h.host:443)")
+	pflag.StringVarP(&apiKey, "key", "k", "", "用户 API Key")
+	pflag.StringVarP(&configPath, "config", "c", config.GetConfigPath(), "配置文件路径")
+	pflag.StringVarP(&pathName, "path", "p", "", "映射的路径名称")
+	pflag.IntVarP(&localPort, "local", "l", 0, "要代理的本地端口")
+	pflag.IntVarP(&serviceID, "service", "S", 0, "服务 ID")
+	pflag.BoolVar(&listPaths, "list", false, "列出所有路径映射")
+	pflag.BoolVar(&listAPI, "list-api", false, "列出所有 API Key")
+	pflag.BoolVar(&listService, "list-service", false, "列出所有服务")
+	pflag.IntVarP(&setDefault, "default", "d", 0, "设置默认服务")
+	pflag.BoolVarP(&help, "help", "h", false, "显示帮助信息")
 
 	pflag.Parse()
 
@@ -45,7 +45,7 @@ func main() {
 
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
-		fmt.Printf("Error loading config: %v\n", err)
+		fmt.Printf("加载配置出错: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -58,13 +58,13 @@ func main() {
 	}
 
 	if listService {
-		fmt.Println("Listing services...")
-		// TODO: Implementation
+		fmt.Println("正在列出服务...")
+		// TODO: Implementation (实现)
 		return
 	}
 
 	if pathName != "" && localPort != 0 {
-		fmt.Printf("Adding path mapping: %s -> %d\n", pathName, localPort)
+		fmt.Printf("正在添加路径映射: %s -> %d\n", pathName, localPort)
 		cfg.Paths = append(cfg.Paths, config.PathConfig{
 			Name:    pathName,
 			Port:    localPort,
@@ -75,18 +75,11 @@ func main() {
 	}
 
 	if cfg.Server == "" || cfg.APIKey == "" {
-		fmt.Println("Error: Server address and API KEY are required. Use -s and -k to bind.")
+		fmt.Println("错误：需要服务器地址和 API Key。使用 -s 和 -k 进行绑定。")
 		pflag.Usage()
 		os.Exit(1)
 	}
 
-	fmt.Printf("Connecting to server: %s\n", cfg.Server)
-	err = webrtc.ConnectToServer(cfg.Server, cfg.APIKey)
-	if err != nil {
-		fmt.Printf("Failed to connect: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Keep alive
-	select {}
+	fmt.Printf("正在连接服务器: %s\n", cfg.Server)
+	webrtc.ConnectWithRetry(cfg.Server, cfg.APIKey)
 }
