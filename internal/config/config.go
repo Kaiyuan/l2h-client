@@ -7,17 +7,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type ServiceConfig struct {
+	Server string `yaml:"server"`
+	APIKey string `yaml:"api_key"`
+}
+
 type Config struct {
-	Server    string      `yaml:"server"`
-	APIKey    string      `yaml:"api_key"`
-	DefaultSvc int        `yaml:"default_service"`
-	Paths     []PathConfig `yaml:"paths"`
+	Services   []ServiceConfig `yaml:"services"`
+	DefaultSvc int             `yaml:"default_service"` // 1-based index
+	Paths      []PathConfig    `yaml:"paths"`
 }
 
 type PathConfig struct {
 	Name    string `yaml:"name"`
 	Port    int    `yaml:"port"`
-	Service int    `yaml:"service"`
+	Service int    `yaml:"service"` // Index to Services
 }
 
 func GetConfigPath() string {
