@@ -1,8 +1,6 @@
 name: Go Multi-Arch Releaser
 
 on:
-  release:
-    types: [published]
   push:
     tags:
       - 'v*'
@@ -58,10 +56,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: bin/*
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          overwrite: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   docker:
     name: Build & Push Client Docker Image
