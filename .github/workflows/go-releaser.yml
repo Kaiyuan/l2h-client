@@ -1,6 +1,8 @@
 name: Go Multi-Arch Releaser
 
 on:
+  release:
+    types: [published]
   push:
     tags:
       - 'v*'
