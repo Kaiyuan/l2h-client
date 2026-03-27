@@ -64,6 +64,7 @@ jobs:
 
   docker:
     name: Build & Push Client Docker Image
+    needs: publish
     runs-on: ubuntu-latest
     permissions:
       contents: read
