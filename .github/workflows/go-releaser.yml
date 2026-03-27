@@ -57,10 +57,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           files: bin/*
           generate_release_notes: true
-          overwrite: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
   docker:
     name: Build & Push Client Docker Image
