@@ -58,11 +58,18 @@ func ConnectWithRetry(serverURL, apiKey string) {
 }
 
 func ConnectToServer(serverURL, apiKey string) error {
+	// 0. 从服务端动态获取 ICE 配置
+	iceConfig, err := getRemoteICEConfig(serverURL)
+	if err != nil {
+		fmt.Printf("警告：无法从服务端获取动态 ICE 配置，将使用默认值: %v\n", err)
+		iceConfig = []string{"stun:stun.cloudflare.com:3478"}
+	}
+
 	// 1. Create WebRTC PeerConnection
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
+				URLs: iceConfig,
 			},
 		},
 	}
@@ -247,3 +254,20 @@ func isForbiddenHeader(h string) bool {
 	// Some headers are hop-by-hop or managed by http.Client
 	return h == "connection" || h == "upgrade" || h == "proxy-connection" || h == "transfer-encoding"
 }
+
+func getRemoteICEConfig(serverURL string) ([]string, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/api/webrtc/config", serverURL))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		IceServers []string `json:"iceServers"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return result.IceServers, nil
+}
+
